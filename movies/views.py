@@ -1,6 +1,11 @@
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render
 from .models import Movie
+from .serializers import MovieSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
 
 
 def movies(request):
@@ -29,5 +34,18 @@ def delete(request, id):
         Movie.objects.get(pk=id)
     except:
         raise Http404('Movie does not  exist')
-    movie.delete()
+    movies.delete()
     return HttpResponseRedirect('/movies')
+
+@api_view(['GET', 'POST'])
+def movie_list(request):
+
+    if request.method == 'GET':
+        movies = Movie.objects.all()
+        serializer = MovieSerializer(movies, many=True)
+        return JsonResponse({"movies":serializer.data})
+    if request.method == 'POST':
+        serializer = MovieSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
