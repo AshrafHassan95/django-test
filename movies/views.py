@@ -8,20 +8,18 @@ from rest_framework import status
 
 
 
-def movies(request):
-    data = Movie.objects.all()
-    return render(request, 'movies/movies.html', {'movies':data})
-
 def home(request):
     return HttpResponse("Home page")
 
+
 @api_view(['GET', 'POST'])
-def movie_list(request):
+def movies(request):
 
     if request.method == 'GET':
         movies = Movie.objects.all()
         serializer = MovieSerializer(movies, many=True)
-        return JsonResponse({"movies":serializer.data})
+        return Response(serializer.data)
+    
     if request.method == 'POST':
         serializer = MovieSerializer(data=request.data)
         if serializer.is_valid():
@@ -37,12 +35,19 @@ def detail(request, id):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
-        serializer = MovieSerializer(movies)
+        serializer = MovieSerializer(data)
         return Response(serializer.data)
+    
     elif request.method == 'PUT':
-        pass
+        serializer = MovieSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     elif request.method == 'DELETE':
-        pass
+        data.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     return render(request, 'movies/detail.html', {'movie':data})
 
