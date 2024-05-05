@@ -13,7 +13,7 @@ def home(request):
 
 
 @api_view(['GET', 'POST'])
-def movies(request):
+def movies_list(request, format=None):
 
     if request.method == 'GET':
         movies = Movie.objects.all()
@@ -27,7 +27,7 @@ def movies(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def detail(request, id):
+def detail(request, id, format=None):
 
     try:
         data = Movie.objects.get(pk=id)
